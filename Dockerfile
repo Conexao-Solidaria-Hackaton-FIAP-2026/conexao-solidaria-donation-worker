@@ -1,0 +1,16 @@
+# Dockerfile para donation-worker
+# Copiar para a raiz do repo conexao-solidaria-donation-worker como "Dockerfile"
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+COPY *.sln ./
+COPY src/DonationWorker/*.csproj ./src/DonationWorker/
+RUN dotnet restore
+COPY . .
+RUN dotnet publish src/DonationWorker -c Release -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /publish .
+EXPOSE 9091
+ENTRYPOINT ["dotnet", "DonationWorker.dll"]
