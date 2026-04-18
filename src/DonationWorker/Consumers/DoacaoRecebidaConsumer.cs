@@ -29,10 +29,10 @@ public class DoacaoRecebidaConsumer(AppDbContext db, ILogger<DoacaoRecebidaConsu
             // 1. Registra a doacao na tabela propria do worker
             _db.Doacoes.Add(new Doacao
             {
-                Id           = evt.Id,
-                CampanhaId   = evt.CampanhaId,
-                DoadorId     = evt.DoadorId,
-                Valor        = evt.ValorDoacao,
+                Id = evt.Id,
+                CampanhaId = evt.CampanhaId,
+                DoadorId = evt.DoadorId,
+                Valor = evt.ValorDoacao,
                 ProcessadoEm = DateTime.UtcNow
             });
 
