@@ -1,3 +1,5 @@
+using DonationWorker.Data;
+
 namespace DonationWorker.Domain;
 
 public record DoacaoRecebidaEvent
@@ -7,4 +9,5 @@ public record DoacaoRecebidaEvent
     public Guid DoadorId { get; init; }
     public decimal ValorDoacao { get; init; }
     public DateTime CriadoEm { get; init; }
+    public DoacaoStatus Status { get; private set; }
 }

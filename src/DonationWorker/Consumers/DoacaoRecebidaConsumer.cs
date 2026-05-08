@@ -26,18 +26,22 @@ public class DoacaoRecebidaConsumer(AppDbContext db, ILogger<DoacaoRecebidaConsu
 
         try
         {
-            // 1. Registra a doacao na tabela propria do worker
-            _db.Doacoes.Add(new Doacao
+            var doacao = await _db.Doacoes.FindAsync(evt.Id);
+            if (doacao is null)
             {
-                Id = evt.Id,
-                CampanhaId = evt.CampanhaId,
-                DoadorId = evt.DoadorId,
-                Valor = evt.ValorDoacao,
-                ProcessadoEm = DateTime.UtcNow
-            });
+                _logger.LogWarning("Doacao {Id} nao encontrada.", evt.Id);
+                DoacoesComErro.Inc();
+                return;
+            }
 
-            // 2. Atualiza ValorArrecadado na tabela Campanhas (banco compartilhado)
-            // Usa SQL direto para nao precisar mapear a entidade Campanha aqui
+            if (doacao.Status == DoacaoStatus.Processada)
+            {
+                _logger.LogWarning("Doacao {Id} ja processada, ignorando duplicata.", evt.Id);
+                return;
+            }
+
+            doacao.Status = DoacaoStatus.Processada;
+
             var rows = await _db.Database.ExecuteSqlRawAsync(
                 "UPDATE dbo.Campanhas SET ValorArrecadado = ValorArrecadado + {0} WHERE Id = {1}",
                 evt.ValorDoacao, evt.CampanhaId);
